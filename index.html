@@ -23,7 +23,7 @@
             --accent-hover: #0284c7;
             --text-white: #ffffff;
             --text-dark: #0f172a;
-            --border-bold: #475569; /* Extra Strong Border Color */
+            --border-bold: #475569;
         }
 
         * {
@@ -206,7 +206,7 @@
             text-align: center;
         }
 
-        /* FREEZE HEADER STYLES - LARGER & BOLDER */
+        /* FREEZE HEADER STYLES */
         th {
             position: sticky;
             top: 0;
@@ -215,7 +215,7 @@
             color: var(--text-white);
             padding: 12px 10px;
             font-weight: 800;
-            font-size: 1.05rem; /* Increased Size */
+            font-size: 1.05rem;
             letter-spacing: 0.5px;
             border-bottom: 3.5px solid var(--accent-cyan);
             border-right: 1.5px solid var(--navy-border);
@@ -227,12 +227,12 @@
             border-right: none;
         }
 
-        /* LARGER & BOLDER CELL STYLES */
+        /* BOLDER CELL STYLES */
         td {
-            padding: 10px 12px; /* Increased Padding */
-            font-size: 1.05rem; /* Increased Size */
-            font-weight: 800;   /* Extra Bold Text */
-            color: #020617;     /* High Contrast Dark Color */
+            padding: 10px 12px;
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #020617;
             border-bottom: 1.5px solid var(--border-bold);
             border-right: 1.5px solid var(--border-bold);
             white-space: nowrap;
@@ -242,10 +242,9 @@
             border-right: none;
         }
 
-        /* Column Specific Alignments & Bold Formatting */
         .clinic-col {
             text-align: left !important;
-            font-weight: 900 !important; /* Maximum Boldness for Clinic Name */
+            font-weight: 900 !important;
             color: #000000 !important;
             padding-left: 14px;
             font-size: 1.05rem;
@@ -258,7 +257,7 @@
         }
 
         .count-col {
-            font-size: 1.15rem; /* Extra Large Count Numbers */
+            font-size: 1.15rem;
             color: #0284c7;
             font-weight: 900;
         }
@@ -332,9 +331,7 @@
         const file = e.target.files[0];
         if (!file) return;
 
-        // Display selected file name
         document.getElementById('fileName').textContent = file.name;
-
         document.getElementById('loader').style.display = 'block';
         document.getElementById('tableContainer').style.display = 'none';
         
@@ -356,7 +353,6 @@
     function processExcelData(rows) {
         let headerRowIndex = -1;
         
-        // Header Row Search
         for (let i = 0; i < rows.length; i++) {
             if (rows[i] && rows[i].some(cell => typeof cell === 'string' && cell.toLowerCase().includes('clinic name'))) {
                 headerRowIndex = i;
@@ -372,7 +368,6 @@
 
         const headers = rows[headerRowIndex].map(h => typeof h === 'string' ? h.toLowerCase().trim() : '');
         
-        // Find Column Indexes
         const clinicIdx = headers.findIndex(h => h.includes('clinic name'));
         const loginIdIdx = headers.findIndex(h => h.includes('login id'));
         const loginTimeIdx = headers.findIndex(h => h.includes('login time'));
@@ -383,6 +378,7 @@
 
         globalData = [];
         const regionsSet = new Set();
+        const uniqueClinics = new Set(); // Track unique clinic names to filter duplicates
 
         for (let i = headerRowIndex + 1; i < rows.length; i++) {
             const row = rows[i];
@@ -390,6 +386,12 @@
 
             const clinicName = (row[clinicIdx] || '').toString().trim();
             if (!clinicName) continue;
+
+            // DUPLICATE REMOVAL CHECK: Skip if clinic name is already processed
+            if (uniqueClinics.has(clinicName)) {
+                continue;
+            }
+            uniqueClinics.add(clinicName);
 
             // Region extraction (last word of clinic name)
             const parts = clinicName.split(' ');
@@ -409,7 +411,7 @@
             });
         }
 
-        // Region Dropdown
+        // Region Dropdown Initialization
         const regionSelect = document.getElementById('regionSelect');
         regionSelect.innerHTML = '<option value="">-- Select Region --</option>';
         
