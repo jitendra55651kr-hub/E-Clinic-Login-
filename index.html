@@ -6,7 +6,7 @@
     <title>E-Clinic Daily Login Dashboard</title>
     
     <!-- Google Fonts & Font Awesome Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- SheetJS for Excel Reading -->
@@ -23,7 +23,7 @@
             --accent-hover: #0284c7;
             --text-white: #ffffff;
             --text-dark: #0f172a;
-            --border-bold: #64748b; /* Stronger Border Color */
+            --border-bold: #475569; /* Extra Strong Border Color */
         }
 
         * {
@@ -37,7 +37,7 @@
             background-color: var(--bg-light);
             color: var(--text-dark);
             min-height: 100vh;
-            padding: 10px; /* Reduced Padding */
+            padding: 10px;
         }
 
         .container {
@@ -46,7 +46,7 @@
             background: var(--card-bg);
             border: 2px solid var(--navy-dark);
             border-radius: 10px;
-            padding: 15px; /* Reduced Padding for compact feel */
+            padding: 15px;
             box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
         }
 
@@ -54,16 +54,16 @@
         .main-header {
             background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy-card) 100%);
             color: var(--text-white);
-            padding: 10px 15px; /* Reduced Padding */
+            padding: 12px 15px;
             border-radius: 8px;
             text-align: center;
-            margin-bottom: 12px; /* Reduced Margin */
+            margin-bottom: 12px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
             border-left: 5px solid var(--accent-cyan);
         }
 
         .main-title {
-            font-size: 1.6rem; /* Compact Font */
+            font-size: 1.75rem;
             font-weight: 800;
             letter-spacing: 1px;
             text-transform: uppercase;
@@ -82,15 +82,15 @@
         .controls-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 12px; /* Reduced Gap */
-            margin-bottom: 12px; /* Reduced Margin */
+            gap: 12px;
+            margin-bottom: 12px;
         }
 
         .control-card {
             background: var(--navy-card);
             border: 2px solid var(--navy-border);
             border-radius: 8px;
-            padding: 10px 15px; /* Compact Padding */
+            padding: 10px 15px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
@@ -100,7 +100,7 @@
             gap: 8px;
             font-weight: 800;
             color: var(--text-white);
-            font-size: 1rem;
+            font-size: 1.05rem;
             margin-bottom: 6px;
             letter-spacing: 0.5px;
         }
@@ -121,7 +121,7 @@
             background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-hover) 100%);
             color: #ffffff;
             font-weight: 800;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             padding: 8px 14px;
             border-radius: 5px;
             cursor: pointer;
@@ -141,8 +141,8 @@
 
         .file-name-text {
             color: #94a3b8;
-            font-weight: 600;
-            font-size: 0.85rem;
+            font-weight: 700;
+            font-size: 0.9rem;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -156,8 +156,8 @@
         select {
             width: 100%;
             padding: 8px 12px;
-            font-size: 0.95rem;
-            font-weight: 700;
+            font-size: 1rem;
+            font-weight: 800;
             border: 2px solid var(--navy-border);
             border-radius: 5px;
             background: var(--navy-dark);
@@ -190,10 +190,10 @@
         /* Fixed Height & Scrollable Table Container */
         .table-container {
             display: none;
-            max-height: calc(100vh - 180px); /* Adjusts perfectly to screen height */
+            max-height: calc(100vh - 180px);
             overflow-y: auto;
             overflow-x: auto;
-            border: 2px solid var(--navy-dark); /* Bold Outer Border */
+            border: 2px solid var(--navy-dark);
             border-radius: 6px;
             background: #ffffff;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
@@ -201,22 +201,23 @@
 
         table {
             width: 100%;
-            border-collapse: separate; /* Allows sticky header to render borders cleanly */
+            border-collapse: separate;
             border-spacing: 0;
             text-align: center;
         }
 
-        /* FREEZE HEADER STYLES */
+        /* FREEZE HEADER STYLES - LARGER & BOLDER */
         th {
             position: sticky;
             top: 0;
             z-index: 10;
             background-color: var(--navy-dark);
             color: var(--text-white);
-            padding: 10px 8px;
+            padding: 12px 10px;
             font-weight: 800;
-            font-size: 0.95rem;
-            border-bottom: 3px solid var(--accent-cyan); /* Distinct Header Bottom Border */
+            font-size: 1.05rem; /* Increased Size */
+            letter-spacing: 0.5px;
+            border-bottom: 3.5px solid var(--accent-cyan);
             border-right: 1.5px solid var(--navy-border);
             white-space: nowrap;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
@@ -226,14 +227,14 @@
             border-right: none;
         }
 
-        /* Crisp Cell & Bold Border Styling */
+        /* LARGER & BOLDER CELL STYLES */
         td {
-            padding: 8px 10px;
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: #0f172a;
-            border-bottom: 1.5px solid var(--border-bold); /* Bold Row Border */
-            border-right: 1.5px solid var(--border-bold);  /* Bold Column Border */
+            padding: 10px 12px; /* Increased Padding */
+            font-size: 1.05rem; /* Increased Size */
+            font-weight: 800;   /* Extra Bold Text */
+            color: #020617;     /* High Contrast Dark Color */
+            border-bottom: 1.5px solid var(--border-bold);
+            border-right: 1.5px solid var(--border-bold);
             white-space: nowrap;
         }
 
@@ -241,23 +242,25 @@
             border-right: none;
         }
 
-        /* Column Specific Alignments */
+        /* Column Specific Alignments & Bold Formatting */
         .clinic-col {
             text-align: left !important;
-            font-weight: 800 !important;
+            font-weight: 900 !important; /* Maximum Boldness for Clinic Name */
             color: #000000 !important;
-            padding-left: 12px;
+            padding-left: 14px;
+            font-size: 1.05rem;
         }
 
         .ip-col {
             font-family: 'Courier New', Courier, monospace;
-            font-weight: 700;
+            font-weight: 800;
+            font-size: 1.05rem;
         }
 
         .count-col {
-            font-size: 1rem;
+            font-size: 1.15rem; /* Extra Large Count Numbers */
             color: #0284c7;
-            font-weight: 800;
+            font-weight: 900;
         }
 
         tr:nth-child(even) {
@@ -265,7 +268,7 @@
         }
 
         tr:hover {
-            background-color: #bae6fd; /* Highlighting row on hover */
+            background-color: #bae6fd;
         }
     </style>
 </head>
