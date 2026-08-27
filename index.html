@@ -81,7 +81,7 @@
         /* Dark Navy Controls Grid */
         .controls-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 12px;
             margin-bottom: 12px;
         }
@@ -190,7 +190,7 @@
         /* Fixed Height & Scrollable Table Container */
         .table-container {
             display: none;
-            max-height: calc(100vh - 180px);
+            max-height: calc(100vh - 200px);
             overflow-y: auto;
             overflow-x: auto;
             border: 2px solid var(--navy-dark);
@@ -281,7 +281,7 @@
     <div class="controls-grid">
         <!-- Control Card 1: Custom File Upload -->
         <div class="control-card">
-            <label for="fileUpload"><i class="fa-solid fa-file-excel"></i> 1. Upload Report (Excel / CSV)</label>
+            <label for="fileUpload"><i class="fa-solid fa-file-excel"></i> 1. Upload Report</label>
             <div class="file-upload-container">
                 <button type="button" class="file-upload-btn" onclick="document.getElementById('fileUpload').click();">
                     <i class="fa-solid fa-upload"></i> Choose File
@@ -290,10 +290,18 @@
                 <input type="file" id="fileUpload" accept=".xlsx, .xls, .csv">
             </div>
         </div>
-        
-        <!-- Control Card 2: Select Region -->
+
+        <!-- Control Card 2: Select Login Code (Prefix like 23:, 14:) -->
         <div class="control-card">
-            <label for="regionSelect"><i class="fa-solid fa-location-crosshairs"></i> 2. Select Region</label>
+            <label for="codeSelect"><i class="fa-solid fa-filter"></i> 2. Filter by Login Code</label>
+            <select id="codeSelect" disabled>
+                <option value="">-- Upload file first --</option>
+            </select>
+        </div>
+        
+        <!-- Control Card 3: Select Region -->
+        <div class="control-card">
+            <label for="regionSelect"><i class="fa-solid fa-location-crosshairs"></i> 3. Filter by Region</label>
             <select id="regionSelect" disabled>
                 <option value="">-- Upload file first --</option>
             </select>
@@ -350,6 +358,16 @@
         reader.readAsArrayBuffer(file);
     });
 
+    function extractCodePrefix(str) {
+        if (!str) return 'OTHER';
+        // Extract digits before colon (e.g. EC23:04 -> 23:, 23:04 -> 23:, ec14:02 -> 14:)
+        const match = str.match(/(?:EC|ec)?(\d{2,3}:)/i);
+        if (match) {
+            return match[1];
+        }
+        return 'OTHER';
+    }
+
     function processExcelData(rows) {
         let headerRowIndex = -1;
         
@@ -378,7 +396,7 @@
 
         globalData = [];
         const regionsSet = new Set();
-        const uniqueClinics = new Set(); // Track unique clinic names to filter duplicates
+        const codesSet = new Set();
 
         for (let i = headerRowIndex + 1; i < rows.length; i++) {
             const row = rows[i];
@@ -387,11 +405,16 @@
             const clinicName = (row[clinicIdx] || '').toString().trim();
             if (!clinicName) continue;
 
-            // DUPLICATE REMOVAL CHECK: Skip if clinic name is already processed
-            if (uniqueClinics.has(clinicName)) {
-                continue;
+            const loginId = loginIdIdx !== -1 ? (row[loginIdIdx] || '-').toString().trim() : '-';
+
+            // Extract Login Code Prefix (e.g., "23:", "14:")
+            let codePrefix = extractCodePrefix(loginId);
+            if (codePrefix === 'OTHER') {
+                codePrefix = extractCodePrefix(clinicName);
             }
-            uniqueClinics.add(clinicName);
+            if (codePrefix !== 'OTHER') {
+                codesSet.add(codePrefix);
+            }
 
             // Region extraction (last word of clinic name)
             const parts = clinicName.split(' ');
@@ -401,8 +424,9 @@
             
             globalData.push({
                 region: region,
+                codePrefix: codePrefix,
                 clinicName: clinicName,
-                loginId: loginIdIdx !== -1 ? (row[loginIdIdx] || '-').toString().trim() : '-',
+                loginId: loginId,
                 loginTime: loginTimeIdx !== -1 ? (row[loginTimeIdx] || '-').toString().trim() : '-',
                 logoutTime: logoutTimeIdx !== -1 ? (row[logoutTimeIdx] || '-').toString().trim() : '-',
                 ip: ipIdx !== -1 ? (row[ipIdx] || '-').toString().trim() : '-',
@@ -411,10 +435,21 @@
             });
         }
 
-        // Region Dropdown Initialization
+        // Initialize Login Code Dropdown
+        const codeSelect = document.getElementById('codeSelect');
+        codeSelect.innerHTML = '<option value="">-- Select Login Code --</option>';
+        const sortedCodes = Array.from(codesSet).sort((a, b) => parseInt(a) - parseInt(b));
+        sortedCodes.forEach(code => {
+            const opt = document.createElement('option');
+            opt.value = code;
+            opt.textContent = code;
+            codeSelect.appendChild(opt);
+        });
+        codeSelect.disabled = false;
+
+        // Initialize Region Dropdown
         const regionSelect = document.getElementById('regionSelect');
         regionSelect.innerHTML = '<option value="">-- Select Region --</option>';
-        
         const sortedRegions = Array.from(regionsSet).sort();
         sortedRegions.forEach(reg => {
             const opt = document.createElement('option');
@@ -422,33 +457,26 @@
             opt.textContent = reg;
             regionSelect.appendChild(opt);
         });
-
         regionSelect.disabled = false;
+
         document.getElementById('loader').style.display = 'none';
+        
+        // Render initial full data or reset view
+        renderTable(globalData);
     }
 
-    document.getElementById('regionSelect').addEventListener('change', function(e) {
-        const selectedRegion = e.target.value;
+    function renderTable(dataList) {
         const tableBody = document.getElementById('tableBody');
         const tableContainer = document.getElementById('tableContainer');
         
         tableBody.innerHTML = '';
         
-        if (!selectedRegion) {
-            tableContainer.style.display = 'none';
-            return;
-        }
-
-        const filteredData = globalData
-            .filter(item => item.region === selectedRegion)
-            .sort((a, b) => a.clinicName.localeCompare(b.clinicName));
-
-        if (filteredData.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red; padding: 20px;">No records found for this region.</td></tr>';
+        if (!dataList || dataList.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red; padding: 20px;">No matching records found.</td></tr>';
         } else {
-            filteredData.forEach(item => {
+            const sorted = [...dataList].sort((a, b) => a.clinicName.localeCompare(b.clinicName));
+            sorted.forEach(item => {
                 const tr = document.createElement('tr');
-                
                 tr.innerHTML = `
                     <td class="clinic-col">${item.clinicName}</td>
                     <td>${item.loginId}</td>
@@ -458,12 +486,38 @@
                     <td class="count-col">${item.consultCount}</td>
                     <td class="count-col">${item.policyCount}</td>
                 `;
-                
                 tableBody.appendChild(tr);
             });
         }
-        
         tableContainer.style.display = 'block';
+    }
+
+    // Filter Logic for Code Dropdown
+    document.getElementById('codeSelect').addEventListener('change', function(e) {
+        const selectedCode = e.target.value;
+        document.getElementById('regionSelect').value = ''; // Reset Region filter
+        
+        if (!selectedCode) {
+            document.getElementById('tableContainer').style.display = 'none';
+            return;
+        }
+
+        const filtered = globalData.filter(item => item.codePrefix === selectedCode);
+        renderTable(filtered);
+    });
+
+    // Filter Logic for Region Dropdown
+    document.getElementById('regionSelect').addEventListener('change', function(e) {
+        const selectedRegion = e.target.value;
+        document.getElementById('codeSelect').value = ''; // Reset Code filter
+        
+        if (!selectedRegion) {
+            document.getElementById('tableContainer').style.display = 'none';
+            return;
+        }
+
+        const filtered = globalData.filter(item => item.region === selectedRegion);
+        renderTable(filtered);
     });
 </script>
 </body>
